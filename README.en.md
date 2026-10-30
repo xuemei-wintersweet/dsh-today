@@ -62,7 +62,8 @@ Ideal for air-gapped environments, machines without npm, or users seeking zero-c
    - Validates the local Node.js environment;
    - Locates the active DSH desktop profile directory (`~/.dsh/profiles/desktop/`);
    - Unpacks precompiled production assets from embedded data;
-   - Registers dependencies in `package.json` and injects `cordis.yml` (with automatic timestamped backups);
+   - Registers the local source via DSH native `link:` protocol (supports seamless uninstallation and reinstallation via UI without remote npm dependencies);
+   - Injects `cordis.yml` configuration (with automatic timestamped backups);
    - Executes `bin.js doctor` self-diagnostics.
 4. Restart DSH NEXT and select `Today CN / DeepSeek V4.1 Flash` in the model selector.
 

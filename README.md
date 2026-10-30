@@ -62,7 +62,8 @@ dsh plugin --profile desktop add ./dsh-today-1.2.1.tgz
    - 本地 Node.js 运行时环境校验；
    - 自动定位当前系统的 DSH profile 路径（`~/.dsh/profiles/desktop/`）；
    - 从内嵌数据流中解包全量预编译运行时文件；
-   - 自动在 `package.json` 注册依赖并安全追加 `cordis.yml` 注入配置（自带带时间戳的防损备份）；
+   - 通过 DSH 原生 `link:` 机制完成本地零网络离线注册（支持在客户端内置插件界面中一键直接卸载与重新安装，零 npm 远端依赖）；
+   - 安全追加 `cordis.yml` 注入配置（自带带时间戳的防损备份）；
    - 自动调用 `bin.js doctor` 完成本地凭据与客户端状态自检。
 4. 重启 DSH NEXT，在模型列表中选择 `Today CN / DeepSeek V4.1 Flash` 即可。
 
