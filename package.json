@@ -1,8 +1,8 @@
 {
   "name": "dsh-today",
-  "displayName": "DSH Today",
+  "displayName": "DSH Connect Today",
   "version": "1.2.1",
-  "description": "Seamlessly connect locally authorized Today AI desktop sessions to DeepSeek Harness (DSH). Features Dual-Track Thinking, Autonomous Auto-Pump, and zero-leak local DPAPI interop.",
+  "description": "把本机登录的 Today AI 模型接入 DeepSeek Harness：支持原生双轨思考过程呈现、自驱动 Auto-Pump 任务交付引擎与本地 DPAPI 零密钥安全互操作。",
   "type": "module",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
@@ -50,20 +50,32 @@
     "status": "node dist/src/bin.js status"
   },
   "keywords": [
-    "dsh",
     "dsh-plugin",
     "deepseek-harness",
+    "today",
     "today-ai",
     "todayai",
     "model-provider",
-    "openai-shim",
+    "deepseek-v4",
     "dual-track-thinking",
-    "auto-pump"
+    "auto-pump",
+    "cordis"
   ],
   "author": "dsh-today contributors",
   "license": "MIT",
   "engines": {
     "node": ">=20.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xuemei-wintersweet/dsh-today.git"
+  },
+  "homepage": "https://github.com/xuemei-wintersweet/dsh-today#readme",
+  "bugs": {
+    "url": "https://github.com/xuemei-wintersweet/dsh-today/issues"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": ">=4.0.1-rc.1 <5.0.0 || >=4.0.2 <5.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

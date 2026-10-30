@@ -1,7 +1,11 @@
 {
+  "meta": {
+    "title": "dsh-today",
+    "description": "Connect locally authorized Today AI models to DeepSeek Harness: features Dual-Track Thinking, Autonomous Task Auto-Pump, and zero-leak local DPAPI credentials."
+  },
   "plugin": {
     "title": "Today AI Connector",
-    "description": "Reuse local Today CN / Today Global desktop sign-in for free quota and multi-model options"
+    "description": "Reuse local Today CN / Today Global desktop sign-in for cloud model quota and multi-model options"
   },
   "region": {
     "cn": "Today CN (Domestic)",

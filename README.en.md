@@ -1,124 +1,224 @@
-# dsh-today
+<h1 align="center">dsh-today</h1>
 
-English | [简体中文](./README.md)
+<p align="center"><b>Connect locally authorized Today AI models (DeepSeek V4.1 Flash, MiniMax M3.1 Flash, GLM 5.3) to DeepSeek Harness (DSH) — featuring native Dual-Track Thinking presentation, Autonomous Task Auto-Pump engine, and zero-leak local DPAPI credentials.</b></p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
-[![Node.js Version](https://img.shields.io/badge/Node-%3E%3D20.0.0-brightgreen.svg)](https://nodejs.org/)
-[![DSH Compatibility](https://img.shields.io/badge/DSH-Compatible-blueviolet.svg)](https://github.com/deepseek-ai)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS-lightgrey.svg)](https://github.com/your-username/dsh-today)
+<p align="center">
+  <a href="README.md">中文文档</a> ·
+  <a href="#installation-guide">Installation</a> ·
+  <a href="#core-features">Features</a> ·
+  <a href="#architecture--principles">Architecture</a> ·
+  <a href="#supported-hosts--environments">Host Matrix</a> ·
+  <a href="#troubleshooting--faq">Troubleshooting</a> ·
+  <a href="#disclaimer">Disclaimer</a>
+</p>
 
-`dsh-today` is a local model provider connector plugin developed for DeepSeek Harness (DSH).
-
-It allows users to bridge their locally installed and authorized Today AI desktop client (supporting both Today CN and Today Global) into the DSH ecosystem as a model provider. It automatically reuses local session authorizations to provide model discovery, dual-track reasoning streams, autonomous execution handling, and real-time quota visibility.
-
----
-
-## How It Works
-
-1. **Credential Resolution & In-Memory Decryption**
-   - Automatically locates Today client installation paths under the user profile directory (`%APPDATA%\Today CN` or `%APPDATA%\Today` on Windows; standard Application Support directories on macOS).
-   - Decrypts session records in memory via operating system standard APIs (Windows DPAPI `CryptUnprotectData` / macOS Keychain). Tokens exist only in volatile memory and are never written to disk unencrypted or transmitted to external servers.
-2. **Protocol Proxying & Session Lifecycle**
-   - Establishes direct HTTPS / WebSocket channels with Today cloud infrastructure.
-   - Converts standard DSH model requests into upstream protocol formats, caching session contexts across turns to minimize redundant context re-transmission.
-3. **Dual-Track Reasoning Stream (Thinking Process)**
-   - Captures upstream WebSocket reasoning events and `<think>...</think>` tokens in model responses.
-   - Exposes clean reasoning bubbles directly to DSH, collapsing seamlessly into final response text without residual protocol markers.
-4. **Autonomous Forwarding (Auto-Pump)**
-   - For complex, multi-step tasks, automatically recognizes unread artifacts generated on disk (e.g. unzipped plain text or reports).
-   - If the model stalls due to missing inline text, the adapter triggers targeted reading directives to drive the task forward to completion.
+<p align="center">
+  <a href="https://github.com/xuemei-wintersweet/dsh-today/releases"><img src="https://img.shields.io/github/v/release/xuemei-wintersweet/dsh-today?style=flat-square&label=release" alt="latest release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/xuemei-wintersweet/dsh-today?style=flat-square" alt="MIT license"></a>
+  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/node-%3E%3D20.0.0-blue?style=flat-square" alt="node version"></a>
+  <img src="https://img.shields.io/badge/dsh--plugin-compatible-green?style=flat-square" alt="dsh-plugin">
+  <img src="https://img.shields.io/badge/tests-35%20passed-brightgreen?style=flat-square" alt="tests passed">
+</p>
 
 ---
 
-## Supported Models & Quota Usage
+## Risk Disclosure & Usage Scope
 
-Available models are synchronized directly from upstream endpoints. Calls deduct account quota at standard platform multipliers:
+> **Important Notice: This project is an independent open-source interoperability tool. Please read the [Disclaimer](#disclaimer) at the bottom before using.**
 
-| Model ID | Display Name | Multiplier | Context Window | Recommended Use |
+1. **Avoid Double-Client Switching**: The purpose of this plugin is to eliminate the friction of switching back and forth between the official Today AI desktop application and DeepSeek Harness (DSH) by routing locally authorized sessions directly into DSH's model selector.
+2. **Legitimate Billing**: This tool contains no cracking, reverse key forgery, or quota circumvention mechanisms. All inference calls are billed according to standard upstream rates against your own account quota.
+3. **Upstream Protocol Alignment**: The plugin relies on the official desktop client's local session formats and protocol frames. Upstream modifications may require plugin updates.
+
+---
+
+## Installation Guide
+
+### Method 1: DSH Plugin Marketplace Installation (Recommended, Pinned)
+
+This plugin fully adheres to the official DSH bundle specifications (`dsh-plugin`). Install directly through the DSH plugin manager CLI:
+
+```sh
+dsh plugin --profile desktop add dsh-today
+```
+
+If you have downloaded the offline release package `dsh-today-1.2.1.tgz`, install directly using the local path:
+
+```sh
+dsh plugin --profile desktop add ./dsh-today-1.2.1.tgz
+```
+
+Restart your DSH NEXT client after installation to apply changes.
+
+---
+
+### Method 2: Windows All-in-One Standalone Installer (Fully Offline)
+
+Ideal for air-gapped environments, machines without npm, or users seeking zero-configuration setup:
+
+1. Download `dsh-today-setup.bat` from the GitHub Releases page (or use the one in the project root);
+2. Double-click `dsh-today-setup.bat`;
+3. The script automatically:
+   - Validates the local Node.js environment;
+   - Locates the active DSH desktop profile directory (`~/.dsh/profiles/desktop/`);
+   - Unpacks precompiled production assets from embedded data;
+   - Registers dependencies in `package.json` and injects `cordis.yml` (with automatic timestamped backups);
+   - Executes `bin.js doctor` self-diagnostics.
+4. Restart DSH NEXT and select `Today CN / DeepSeek V4.1 Flash` in the model selector.
+
+---
+
+### Method 3: Build from Source
+
+For developers auditing code, reviewing changes, or customizing behavior:
+
+```sh
+git clone https://github.com/xuemei-wintersweet/dsh-today.git
+cd dsh-today
+npm install
+npm run check   # Runs typecheck, 35-suite unit tests, and production build
+npm pack
+```
+
+---
+
+## Supported Hosts & Environments
+
+DSH NEXT checks peer package declarations upon boot. Mismatched host versions are safely skipped.
+
+### 1. DSH Host Compatibility Matrix
+
+| Host Version | Status | Notes |
+| :--- | :--- | :--- |
+| **0.1.7-rc.1 ~ 0.1.7-rc.2** | Fully Supported | Baseline for DSH external bundle plug-in architecture |
+| **0.2.x Stable** (0.2.0, 0.2.1 ...) | Fully Supported | Verified on live production hosts |
+| **0.2.x Prerelease** (rc/alpha) | Supported | Functional via direct `tgz` or directory loading |
+| **>= 0.3.0-0** | Not Yet Verified | Bound by `<0.3.0-0` safety isolation rule |
+| **<= 0.1.6** | Unsupported | Pre-bundle architecture lacking model provider interfaces |
+
+### 2. Operating System & Platform Support
+
+| Platform | Tier | Credential Store Mechanism |
+| :--- | :--- | :--- |
+| **Windows** | **Tier 1** | Verified on Windows 11. Decrypts via native Windows DPAPI (`CryptUnprotectData`); probes `%APPDATA%\Today CN` |
+| **macOS** | Supported | Reads `~/Library/Application Support/Today CN`, supports Keychain interop |
+| **Linux** | Supported | Reads `$XDG_CONFIG_HOME/Today CN` with headless environment variable fallback |
+
+**Node.js Runtime Requirement**: `>= 20.0.0` (tested on Node.js v24.22.1).
+
+---
+
+## Core Features
+
+- **Native Dual-Track Thinking**:
+  Decodes reasoning stream chunks and `<think>...</think>` tags to reliably illuminate DSH's native thinking bubbles. Thinking transitions smoothly into the final response bubble upon completion.
+- **Autonomous Task Engine (Auto-Pump)**:
+  Prevents models from prematurely stopping with excuses during multi-stage tasks. Detects newly created intermediate files (e.g. extracted text, reports) and prompts the model to deliver complete artifacts in a single turn.
+- **In-Memory DPAPI Decryption**:
+  Reads credentials directly from the official desktop app's session state. Decrypted in process memory using Windows DPAPI, ensuring zero plaintext leakage, zero external telemetry, and zero token uploads.
+- **Multi-Region & Model Matrix**:
+  Supports Today CN (Domestic) and Today Global, dynamically retrieving model catalogs and billing multipliers.
+- **Air-Gapped & Offline Resilience**:
+  Packaged with embedded runtime assets, allowing full installation in air-gapped, proxied, or completely offline environments without external network fetches.
+
+---
+
+## Architecture & Principles
+
+```text
+DSH NEXT (Cordis Architecture)
+  │
+  ├── [PiAiAdapter] (Model Provider Routing Layer)
+  │      │
+  │      ▼ (HTTP 127.0.0.1 Loopback)
+  ├── [Today Local Loopback Shim] (Dynamic Port + Random Token Authorization)
+  │      │
+  │      ▼
+  ├── [TodayUpstreamClient] (SSE Protocol Parser & Dual-Track Separation)
+  │      │
+  │      ├── [CredentialStore] ──► Windows DPAPI (CryptUnprotectData)
+  │      │                         Reads %APPDATA%/Today CN Session
+  │      ▼
+  └── Upstream Today AI Cloud Gateway (api.todayai.cn)
+         │
+         ▼ (SSE Stream: reasoning_content + content)
+      DSH Folded Thinking Bubble + Final Markdown Bubble
+```
+
+---
+
+## Model Directory & Multipliers
+
+| Model ID | Foundation Base | Multiplier | Context Window | Recommended Use Case |
 | :--- | :--- | :---: | :---: | :--- |
-| `model.deepseek-v4.1-flash` | DeepSeek V4.1 Flash | 1x | 1,000,000 Tokens | Primary recommended model. Strong code reasoning with native thinking streams. |
-| `model.minimax-m31-flash` | MiniMax M3.1 Flash | 1x (Promo) | 1,000,000 Tokens | General text comprehension, summarization, and standard tasks. |
-| `model.glm-5.3` | GLM 5.3 | 4x | 1,000,000 Tokens | Analytical reasoning across extensive contexts (higher quota multiplier). |
+| `model.deepseek-v4.1-flash` | DeepSeek V4.1 | **1.0×** | 1,000,000 | **Primary Recommendation**: Deep code refactoring, full-repo analysis |
+| `model.minimax-m31-flash` | MiniMax M3.1 | **0.0× ~ 0.5×** | 1,000,000 | **Fast Routine Work**: General Q&A, syntax checks, concise responses |
+| `model.glm-5.3` | GLM-4 / 5 Series | **4.0×** | 200,000 | Multi-step mathematical and domain-specific logic |
 
 ---
 
-## Installation
+## CLI Utilities
 
-### Method 1: Standalone Installer (End Users)
+The package includes CLI tools for out-of-band diagnostics and proxy serving:
 
-1. Download `dsh-today-setup.bat` from the [Releases page](https://github.com/your-username/dsh-today/releases);
-2. Double-click the file to execute. It automatically unpacks components, writes configuration to `cordis.yml`, and verifies local credentials;
-3. Restart DSH and select `Today CN` from the provider list.
+```powershell
+# 1. Environment and credential diagnostics (scrubbed, zero secrets output)
+npx dsh-today doctor
 
-### Method 2: Manual Offline Archive
+# 2. View current plan details and remaining quota
+npx dsh-today status
 
-1. Download `dsh-today-1.2.1.tgz` from [Releases](https://github.com/your-username/dsh-today/releases);
-2. Unpack into your DSH node_modules directory using `tar`:
-   ```powershell
-   mkdir "$HOME\.dsh\profiles\desktop\node_modules\dsh-today" -Force
-   tar -xzf dsh-today-1.2.1.tgz -C "$HOME\.dsh\profiles\desktop\node_modules\dsh-today" --strip-components=1
-   ```
-3. Append the following block to `~/.dsh/profiles/desktop/cordis.yml`:
+# 3. List all upstream model IDs registered on Today Cloud
+npx dsh-today models
+
+# 4. Start local 127.0.0.1 OpenAI-compatible proxy (default port 18421)
+npx dsh-today serve 18421
+```
+
+---
+
+## Troubleshooting & FAQ
+
+### Q1: Today models do not appear in DSH model selector?
+1. Check that `~/.dsh/profiles/desktop/cordis.yml` contains the `dsh-today` block:
    ```yaml
    dsh-today:
      region: cn
      enableNativeDeviceTools: true
      responseTimeoutMs: 120000
    ```
-4. Restart DSH.
+2. Make sure to restart DSH NEXT completely after editing configurations.
 
-### Method 3: Build from Source
+### Q2: `doctor` reports `Auth State: missing`?
+- The plugin reuses your existing Today AI desktop client session. Launch Today AI desktop app, sign in to your account, and re-run `doctor`.
 
-For development or security audits:
+### Q3: Thinking bubble disappears or does not fold?
+- Ensure your DSH profile core packages are version `0.1.7-rc.1` or higher. If prior conversation history contains models that do not support reasoning streams, start a new chat session.
 
-```bash
-git clone https://github.com/your-username/dsh-today.git
-cd dsh-today
-npm install
-npm run check
-npm run build
-```
+### Q4: HTTP 429 rate limit or connection refused?
+- Run `npx dsh-today status` to verify account quota. If a short-term rate limit was triggered, wait 1–2 minutes before retrying.
 
----
+### Q5: Long context warning?
+- While `deepseek-v4.1-flash` supports up to 1M tokens, single requests over 200K tokens may experience increased latency. Use `/compact` to summarize earlier context when necessary.
 
-## CLI Utilities
-
-The package includes a built-in command line interface for diagnostics and local proxying:
-
-```bash
-# Diagnostic self-check (sanitized, zero credential exposure)
-npx dsh-today doctor
-
-# Query account subscription status and usage breakdown
-npx dsh-today status
-
-# Start local 127.0.0.1 OpenAI-compatible proxy (default port 18421)
-npx dsh-today serve 18421
-```
-
-External tools like Cursor or Cline can connect via `http://127.0.0.1:18421/v1`.
-
----
-
-## Privacy & Security Boundaries
-
-- **Local Execution**: All authentication and streaming remain exclusively between local host memory and loopback interface (`127.0.0.1`).
-- **Zero Telemetry**: The codebase contains no telemetry probes, third-party analytics, or external telemetry relays.
-- **Authorized Credentials Only**: Contains no binary cracking, dynamic signature reverse engineering, or credential circumvention logic. It strictly reuses credentials authorized through the user's official client sign-in.
+### Q6: DSH enters Recovery Mode with JSON parse error?
+- Legacy PowerShell 5.1 scripts sometimes prepend a UTF-8 BOM (`0xEF 0xBB 0xBF`) to `package.json`. Run `dsh-today-setup.bat` to automatically restore clean UTF-8 formatting without BOM.
 
 ---
 
 ## Disclaimer
 
-1. **Non-Official Software**: `dsh-today` is an independent interoperability tool. It is not affiliated with, sponsored by, or endorsed by Today AI or DeepSeek.
-2. **Quota Deductions**: Invocations consume the user's authentic account quota at upstream published rates. The tool provides no means to bypass billing or alter subscription limits.
-3. **Terms of Service**: Non-official API usage may carry risk under third-party Terms of Service. Users assume all responsibility for account compliance.
-4. **Takedown Policy**: The maintainers respect intellectual property rights. If a rights holder has concerns regarding this repository, please open an Issue. Action will be taken within 24 to 48 hours.
+1. **Unofficial Tool**: This is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Today AI or DeepSeek AI.
+2. **Legitimate Billing**: All inference token consumption is billed directly against your authorized account quota per standard upstream terms.
+3. **Terms of Service**: Users are responsible for complying with upstream service terms.
+4. **Takedown Policy**: Project maintainers respect intellectual property. For compliance notices, please file an issue for immediate review and resolution within 24–48 hours.
 
-See [DISCLAIMER.md](./DISCLAIMER.md) for full terms.
+Read [DISCLAIMER.md](./DISCLAIMER.md) for complete details.
 
 ---
 
-## License
+## License & Acknowledgments
 
-Distributed under the [MIT License](./LICENSE). Third-party references and notices are detailed in [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).
+- Licensed under the [MIT License](./LICENSE).
+- Thanks to the [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) team for their agentic ecosystem.
+- Special appreciation to `dingminhua/dsh-connect-workbuddy` for setting high engineering benchmarks in DSH plugin architecture.

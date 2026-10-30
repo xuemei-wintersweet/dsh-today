@@ -1,7 +1,11 @@
 {
+  "meta": {
+    "title": "dsh-today",
+    "description": "把本机登录的 Today AI 模型接入 DeepSeek Harness：支持原生双轨思考过程呈现、自驱动 Auto-Pump 任务交付引擎与本地 DPAPI 零密钥安全互操作。"
+  },
   "plugin": {
     "title": "Today AI 连接器",
-    "description": "复用本机 Today CN / Today Global 桌面端登录态，接入免费额度与多模型挡位"
+    "description": "复用本机 Today CN / Today Global 桌面端登录态，接入云端模型配额与多模型挡位"
   },
   "region": {
     "cn": "Today 国内版 (CN)",
@@ -10,7 +14,7 @@
   "status": {
     "signedIn": "已登录",
     "signedOut": "未登录",
-    "remaining": "剩余额度",
+    "remaining": "剩余配额",
     "activeModel": "当前模型挡位"
   }
 }
