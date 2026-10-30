@@ -1,0 +1,72 @@
+{
+  "name": "dsh-today",
+  "displayName": "DSH Today",
+  "version": "1.2.1",
+  "description": "Seamlessly connect locally authorized Today AI desktop sessions to DeepSeek Harness (DSH). Features Dual-Track Thinking, Autonomous Auto-Pump, and zero-leak local DPAPI interop.",
+  "type": "module",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "bin": {
+    "dsh-today": "./dist/src/bin.js",
+    "dsh-connect-today": "./dist/src/bin.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*.json": "./locale/*.json",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "cordis.patch.yml",
+    "locale",
+    "README.md",
+    "README.en.md",
+    "DISCLAIMER.md",
+    "THIRD_PARTY_NOTICES.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "provider": {
+      "ids": [
+        "today",
+        "today-global"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test dist/tests/*.spec.js",
+    "check": "npm run typecheck && npm run test",
+    "start": "node dist/src/bin.js serve",
+    "doctor": "node dist/src/bin.js doctor",
+    "status": "node dist/src/bin.js status"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "today-ai",
+    "todayai",
+    "model-provider",
+    "openai-shim",
+    "dual-track-thinking",
+    "auto-pump"
+  ],
+  "author": "dsh-today contributors",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2"
+  }
+}

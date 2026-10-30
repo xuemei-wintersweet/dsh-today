@@ -1,0 +1,16 @@
+{
+  "plugin": {
+    "title": "Today AI Connector",
+    "description": "Reuse local Today CN / Today Global desktop sign-in for free quota and multi-model options"
+  },
+  "region": {
+    "cn": "Today CN (Domestic)",
+    "global": "Today Global"
+  },
+  "status": {
+    "signedIn": "Signed in",
+    "signedOut": "Signed out",
+    "remaining": "Remaining quota",
+    "activeModel": "Active model option"
+  }
+}

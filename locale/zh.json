@@ -1,0 +1,16 @@
+{
+  "plugin": {
+    "title": "Today AI 连接器",
+    "description": "复用本机 Today CN / Today Global 桌面端登录态，接入免费额度与多模型挡位"
+  },
+  "region": {
+    "cn": "Today 国内版 (CN)",
+    "global": "Today 国际版 (Global)"
+  },
+  "status": {
+    "signedIn": "已登录",
+    "signedOut": "未登录",
+    "remaining": "剩余额度",
+    "activeModel": "当前模型挡位"
+  }
+}

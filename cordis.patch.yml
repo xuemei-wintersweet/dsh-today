@@ -1,0 +1,7 @@
+# Register the Today AI provider without changing the profile's default
+# model unless overridden in the user's cordis.patch.yml. Reuses the
+# Today desktop app's sign-in; no separate OAuth flow is started.
+- insert:
+    - id: dsh-today
+      name: dsh-today
+      config: {}
